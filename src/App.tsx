@@ -1,33 +1,100 @@
-import { useState } from 'react';
-import { Box, Card, Heading } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Image,
+  Text,
+  Input,
+  Link,
+  Select,
+  Heading,
+} from '@chakra-ui/react';
 import './App.css';
 import { Button } from '@chakra-ui/react';
 import { Container } from '@chakra-ui/react';
+import { SimpleGrid } from '@chakra-ui/react';
+import { IoCloudDownloadOutline } from 'react-icons/io5';
 
-enum types {
+enum entityTypes {
   Album = 'album',
   Track = 'musicTrack',
   Artist = 'musicArtist',
 }
 
+interface IResult {
+  artistName: string;
+  collectionName: string;
+  artworkUrl100: string;
+}
+
 function App() {
-  const [results, setResults] = useState([]);
-  const [type, setType] = useState<types>(types.Album);
+  const [results, setResults] = useState<IResult[]>([]);
+  const [type, setType] = useState<entityTypes>(entityTypes.Album);
+  const [searching, setSearching] = useState<boolean>(false);
   const [term, setTerm] = useState<string>('John Lennon');
-  const [resultCount, setResultCount] = useState<number | null>(null);
+  const [searchingFor, setSearchingFor] = useState<string>('Album');
+  const [resultsCount, setResultsCount] = useState<number | null>(null);
+
+  const handleChange = (e) => {
+    setType(e.target.value);
+  };
+
+  useEffect(() => {
+    switch (type) {
+      case 'musicArtist':
+        setSearchingFor('Artist');
+        break;
+      case 'musicTrack':
+        setSearchingFor('Track');
+        break;
+      case 'album':
+        setSearchingFor('Album');
+        break;
+      default:
+        setSearchingFor('Album');
+    }
+  }, [type]);
+
+  const handleKeyDown = (e) => {
+    if (e.code === 'Enter') {
+      setResultsCount(null);
+      setResults([]);
+      getArtwork();
+    }
+  };
+
+  const getThumb = (url: string, size: string): string => {
+    console.log(url, size);
+    return url.replace('100x100bb', `${size}x${size}bb`);
+  };
 
   const getArtwork = () => {
-    console.log('Fetching');
+    setSearching(true);
     fetch(
-      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=10`
+      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=100`
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        console.log(data.results);
+
+        setResultsCount(data.resultsCount);
         setResults(data.results);
-        setResultCount(data.resultCount);
+        setResultsCount(data.resultCount);
       })
       .catch((error) => console.log(error));
+    setSearching(false);
+  };
+
+  const linkProps = {
+    _hover: {
+      cursor: 'pointer',
+      textDecoration: 'underline',
+      color: '#ff9393',
+    },
+    display: 'flex',
+    fontWeight: '500',
+    alignItems: 'center',
+    gap: '2',
+    my: 2,
   };
 
   return (
@@ -48,17 +115,93 @@ function App() {
           </Heading>
         </Container>
       </Box>
-      <Box p={3}>
-        <Container maxW="960px">
-          <Button onClick={() => getArtwork()} colorScheme="blue">
-            Find artwork
-          </Button>
-        </Container>
-        <Container maxW="960px">
-          {Boolean(resultCount) &&
-            results.map((result) => <Box>{result.artistName}</Box>)}
-        </Container>
-      </Box>
+      <Container py={4} maxW="900px">
+        <SimpleGrid columns={2} spacing="40px">
+          <Box py={4} w={'70%'}>
+            <Select placeholder="Looking for:" onChange={handleChange}>
+              <option value="album">Album</option>
+              <option value="musicArtist">Artist</option>
+              <option value="musicTrack">Track</option>
+            </Select>
+          </Box>
+          <Box py={4} w={'70%'}>
+            <Input
+              variant="outline"
+              placeholder={`${searchingFor} name`}
+              onChange={(e) => setTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </Box>
+        </SimpleGrid>
+        <Button onClick={getArtwork} colorScheme="blue">
+          Find artwork
+        </Button>
+      </Container>
+      <Container maxW="900px">
+        <SimpleGrid columns={[2, null, 3]} spacing="40px">
+          {Boolean(resultsCount) &&
+            results.map((result) => {
+              return (
+                <Box
+                  maxW="sm"
+                  borderWidth="1px"
+                  borderColor={'#e4e4e4'}
+                  borderRadius="lg"
+                  bg={'gray.800'}
+                >
+                  <Image
+                    src={getThumb(result.artworkUrl100, '270')}
+                    alt={result.collectionName}
+                  />
+                  <Box color="#FF5E5E" p="4" pb={5}>
+                    <Box mb={4}>
+                      <Text fontWeight="semibold" fontSize="xl">
+                        {result.artistName}
+                      </Text>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="normal"
+                        letterSpacing="wide"
+                      >
+                        {result?.collectionName}
+                      </Text>
+                    </Box>
+                    <Box
+                      _hover={{
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        color: '#ff9393',
+                      }}
+                      display={'flex'}
+                      fontWeight="500"
+                      alignItems={'center'}
+                      gap={2}
+                      my={2}
+                    >
+                      <Link
+                        {...linkProps}
+                        href={getThumb(result.artworkUrl100, '600')}
+                        isExternal
+                      >
+                        <IoCloudDownloadOutline />
+                        Standard res (600px)
+                      </Link>
+                    </Box>
+                    <Link
+                      {...linkProps}
+                      href={getThumb(result.artworkUrl100, '1000')}
+                      isExternal
+                    >
+                      <IoCloudDownloadOutline />
+                      Highest res (1000px)
+                    </Link>
+                  </Box>
+                </Box>
+              );
+            })}
+        </SimpleGrid>
+        {!searching && <Box>{`Showing ${resultsCount} results`}</Box>}
+      </Container>
     </>
   );
 }
