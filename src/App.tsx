@@ -54,7 +54,7 @@ function App() {
     }
   }, [type]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLImageElement>) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.code === 'Enter') {
       setResults([]);
       getArtwork();
@@ -132,7 +132,7 @@ function App() {
               variant="outline"
               placeholder={`${searchingFor} name`}
               onChange={(e) => setTerm(e.target.value)}
-              onKeyDown={() => handleKeyDown}
+              onKeyDown={(e) => handleKeyDown(e as KeyboardEvent)}
             />
           </Box>
         </SimpleGrid>
