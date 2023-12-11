@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, KeyboardEvent } from 'react';
 import {
   Box,
   Image,
@@ -37,15 +37,12 @@ function App() {
   const [resultCount, setResultCount] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
-  const handleChange = (e) => {
-    setType(e.target.value);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setType(e.target.value as entityTypes);
   };
 
   useEffect(() => {
     switch (type) {
-      case 'musicArtist':
-        setSearchingFor('Artist');
-        break;
       case 'musicTrack':
         setSearchingFor('Track');
         break;
@@ -57,7 +54,7 @@ function App() {
     }
   }, [type]);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLImageElement>) => {
     if (e.code === 'Enter') {
       setResults([]);
       getArtwork();
@@ -124,7 +121,7 @@ function App() {
             <Select
               value={type}
               placeholder="Looking for:"
-              onChange={handleChange}
+              onChange={() => handleChange}
             >
               <option value="album">Album</option>
               <option value="musicTrack">Track</option>
@@ -135,7 +132,7 @@ function App() {
               variant="outline"
               placeholder={`${searchingFor} name`}
               onChange={(e) => setTerm(e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={() => handleKeyDown}
             />
           </Box>
         </SimpleGrid>
