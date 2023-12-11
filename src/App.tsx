@@ -7,12 +7,14 @@ import {
   Link,
   Select,
   Heading,
+  Center,
 } from '@chakra-ui/react';
 import './App.css';
 import { Button } from '@chakra-ui/react';
 import { Container } from '@chakra-ui/react';
 import { SimpleGrid } from '@chakra-ui/react';
 import { IoCloudDownloadOutline } from 'react-icons/io5';
+import { AiOutlineLoading } from 'react-icons/ai';
 
 enum entityTypes {
   Album = 'album',
@@ -29,10 +31,11 @@ interface IResult {
 function App() {
   const [results, setResults] = useState<IResult[]>([]);
   const [type, setType] = useState<entityTypes>(entityTypes.Album);
-  const [searching, setSearching] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [term, setTerm] = useState<string>('John Lennon');
   const [searchingFor, setSearchingFor] = useState<string>('Album');
   const [resultsCount, setResultsCount] = useState<number | null>(null);
+  const [showingCount, setShowingCount] = useState<number | null>(null);
 
   const handleChange = (e) => {
     setType(e.target.value);
@@ -68,20 +71,20 @@ function App() {
   };
 
   const getArtwork = () => {
-    setSearching(true);
+    console.log('searching');
+    setIsSearching(true);
     fetch(
-      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=100`
+      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=10`
     )
       .then((response) => response.json())
       .then((data) => {
         console.log(data.results);
-
         setResultsCount(data.resultsCount);
         setResults(data.results);
-        setResultsCount(data.resultCount);
+        setShowingCount(results.length);
       })
+      .finally(() => setIsSearching(false))
       .catch((error) => console.log(error));
-    setSearching(false);
   };
 
   const linkProps = {
@@ -119,7 +122,9 @@ function App() {
         <SimpleGrid columns={2} spacing="40px">
           <Box py={4} w={'70%'}>
             <Select placeholder="Looking for:" onChange={handleChange}>
-              <option value="album">Album</option>
+              <option selected value="album">
+                Album
+              </option>
               <option value="musicArtist">Artist</option>
               <option value="musicTrack">Track</option>
             </Select>
@@ -138,8 +143,16 @@ function App() {
         </Button>
       </Container>
       <Container maxW="900px">
+        {results.length > 0 && (
+          <Text py={3} fontSize="lg">
+            {results.length == 0
+              ? `No results`
+              : `Displaying ${showingCount} results`}
+          </Text>
+        )}
+
         <SimpleGrid columns={[2, null, 3]} spacing="40px">
-          {Boolean(resultsCount) &&
+          {results &&
             results.map((result) => {
               return (
                 <Box
@@ -152,6 +165,7 @@ function App() {
                   <Image
                     src={getThumb(result.artworkUrl100, '270')}
                     alt={result.collectionName}
+                    width="100%"
                   />
                   <Box color="#FF5E5E" p="4" pb={5}>
                     <Box mb={4}>
@@ -189,18 +203,29 @@ function App() {
                     </Box>
                     <Link
                       {...linkProps}
-                      href={getThumb(result.artworkUrl100, '1000')}
+                      href={getThumb(result.artworkUrl100, '2000')}
                       isExternal
                     >
                       <IoCloudDownloadOutline />
-                      Highest res (1000px)
+                      Highest res (2000px)
                     </Link>
                   </Box>
                 </Box>
               );
             })}
         </SimpleGrid>
-        {!searching && <Box>{`Showing ${resultsCount} results`}</Box>}
+        {isSearching && (
+          <Center className="loading">
+            <AiOutlineLoading />
+          </Center>
+        )}
+        {resultsCount > showingCount && (
+          <Center py={4}>
+            <Button onClick={getArtwork} colorScheme="blue">
+              Load more
+            </Button>
+          </Center>
+        )}
       </Container>
     </>
   );

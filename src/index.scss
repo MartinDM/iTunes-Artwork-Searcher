@@ -1,3 +1,18 @@
 .chakra-container {
   max-width: 960px;
 }
+.loading svg {
+  color: rgb(181 181 181);
+  height: 50px;
+  width: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
