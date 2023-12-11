@@ -19,13 +19,13 @@ import { AiOutlineLoading } from 'react-icons/ai';
 enum entityTypes {
   Album = 'album',
   Track = 'musicTrack',
-  Artist = 'musicArtist',
 }
 
 interface IResult {
   artistName: string;
   collectionName: string;
   artworkUrl100: string;
+  collectionId: number;
 }
 
 function App() {
@@ -34,8 +34,8 @@ function App() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [term, setTerm] = useState<string>('John Lennon');
   const [searchingFor, setSearchingFor] = useState<string>('Album');
-  const [resultsCount, setResultsCount] = useState<number | null>(null);
-  const [showingCount, setShowingCount] = useState<number | null>(null);
+  const [resultCount, setResultCount] = useState<number | null>(null);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const handleChange = (e) => {
     setType(e.target.value);
@@ -59,32 +59,32 @@ function App() {
 
   const handleKeyDown = (e) => {
     if (e.code === 'Enter') {
-      setResultsCount(null);
       setResults([]);
       getArtwork();
     }
   };
 
   const getThumb = (url: string, size: string): string => {
-    console.log(url, size);
+    if (!url) return '';
     return url.replace('100x100bb', `${size}x${size}bb`);
   };
 
   const getArtwork = () => {
-    console.log('searching');
     setIsSearching(true);
     fetch(
-      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=10`
+      `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=20`
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.results);
-        setResultsCount(data.resultsCount);
+        setResultCount(data.resultCount);
+        setHasSearched(true);
         setResults(data.results);
-        setShowingCount(results.length);
       })
       .finally(() => setIsSearching(false))
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        setIsSearching(false);
+        console.log(error);
+      });
   };
 
   const linkProps = {
@@ -121,11 +121,12 @@ function App() {
       <Container py={4} maxW="900px">
         <SimpleGrid columns={2} spacing="40px">
           <Box py={4} w={'70%'}>
-            <Select placeholder="Looking for:" onChange={handleChange}>
-              <option selected value="album">
-                Album
-              </option>
-              <option value="musicArtist">Artist</option>
+            <Select
+              value={type}
+              placeholder="Looking for:"
+              onChange={handleChange}
+            >
+              <option value="album">Album</option>
               <option value="musicTrack">Track</option>
             </Select>
           </Box>
@@ -142,31 +143,35 @@ function App() {
           Find artwork
         </Button>
       </Container>
-      <Container maxW="900px">
-        {results.length > 0 && (
+      <Container maxW="900px" mb={6}>
+        {hasSearched && (
           <Text py={3} fontSize="lg">
-            {results.length == 0
-              ? `No results`
-              : `Displaying ${showingCount} results`}
+            {results.length > 0
+              ? `Displaying ${resultCount} results`
+              : 'No results'}
           </Text>
         )}
 
         <SimpleGrid columns={[2, null, 3]} spacing="40px">
           {results &&
             results.map((result) => {
+              const hasImage = result.artworkUrl100;
               return (
                 <Box
+                  key={result.collectionId}
                   maxW="sm"
                   borderWidth="1px"
                   borderColor={'#e4e4e4'}
                   borderRadius="lg"
                   bg={'gray.800'}
                 >
-                  <Image
-                    src={getThumb(result.artworkUrl100, '270')}
-                    alt={result.collectionName}
-                    width="100%"
-                  />
+                  {hasImage && (
+                    <Image
+                      src={getThumb(result.artworkUrl100, '270')}
+                      alt={result.collectionName}
+                      width="100%"
+                    />
+                  )}
                   <Box color="#FF5E5E" p="4" pb={5}>
                     <Box mb={4}>
                       <Text fontWeight="semibold" fontSize="xl">
@@ -180,35 +185,33 @@ function App() {
                         {result?.collectionName}
                       </Text>
                     </Box>
-                    <Box
-                      _hover={{
-                        cursor: 'pointer',
-                        textDecoration: 'underline',
-                        color: '#ff9393',
-                      }}
-                      display={'flex'}
-                      fontWeight="500"
-                      alignItems={'center'}
-                      gap={2}
-                      my={2}
-                    >
-                      <Link
-                        {...linkProps}
-                        href={getThumb(result.artworkUrl100, '600')}
-                        isExternal
+                    {hasImage ? (
+                      <Box
+                        fontWeight="500"
+                        alignItems={'center'}
+                        gap={2}
+                        my={2}
                       >
-                        <IoCloudDownloadOutline />
-                        Standard res (600px)
-                      </Link>
-                    </Box>
-                    <Link
-                      {...linkProps}
-                      href={getThumb(result.artworkUrl100, '2000')}
-                      isExternal
-                    >
-                      <IoCloudDownloadOutline />
-                      Highest res (2000px)
-                    </Link>
+                        <Link
+                          {...linkProps}
+                          href={getThumb(result.artworkUrl100, '600')}
+                          isExternal
+                        >
+                          <IoCloudDownloadOutline />
+                          Standard res (600px)
+                        </Link>
+                        <Link
+                          {...linkProps}
+                          href={getThumb(result.artworkUrl100, '2000')}
+                          isExternal
+                        >
+                          <IoCloudDownloadOutline />
+                          Highest res (2000px)
+                        </Link>
+                      </Box>
+                    ) : (
+                      `No artwork for ${result.collectionName}`
+                    )}
                   </Box>
                 </Box>
               );
@@ -217,13 +220,6 @@ function App() {
         {isSearching && (
           <Center className="loading">
             <AiOutlineLoading />
-          </Center>
-        )}
-        {resultsCount > showingCount && (
-          <Center py={4}>
-            <Button onClick={getArtwork} colorScheme="blue">
-              Load more
-            </Button>
           </Center>
         )}
       </Container>
