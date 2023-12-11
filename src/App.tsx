@@ -1,4 +1,4 @@
-import { useEffect, useState, KeyboardEvent } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Image,
@@ -54,7 +54,7 @@ function App() {
     }
   }, [type]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.code === 'Enter') {
       setResults([]);
       getArtwork();
@@ -131,8 +131,8 @@ function App() {
             <Input
               variant="outline"
               placeholder={`${searchingFor} name`}
-              onChange={(e) => setTerm(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e as KeyboardEvent)}
+              onChange={(e) => setTerm(e.target.value.replace(' ', '+'))}
+              onKeyDown={(e) => handleKeyDown(e)}
             />
           </Box>
         </SimpleGrid>
