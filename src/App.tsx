@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
-import "./App.css";
 import Result from "./components/Result";
 
 enum entityTypes {
