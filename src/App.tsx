@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
-import { Box, Text, Input, Select, Heading, Center } from '@chakra-ui/react';
-import './App.css';
-import { Button } from '@chakra-ui/react';
-import { Container } from '@chakra-ui/react';
-import { SimpleGrid } from '@chakra-ui/react';
-import { AiOutlineLoading } from 'react-icons/ai';
-import Result from './components/result';
+import {
+  Box,
+  Button,
+  Center,
+  Container,
+  Heading,
+  Input,
+  Select,
+  SimpleGrid,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { AiOutlineLoading } from "react-icons/ai";
+import "./App.css";
+import Result from "./components/Result";
 
 enum entityTypes {
-  Album = 'album',
-  Track = 'musicTrack',
+  Album = "album",
+  Track = "musicTrack",
 }
 
-interface IResult {
+export interface IResult {
   artistName: string;
   collectionName: string;
   artworkUrl100: string;
@@ -20,13 +27,12 @@ interface IResult {
 }
 
 function App() {
-  const [results, setResults] = useState<IResult[]>([]);
+  const [results, setResults] = useState<IResult[] | null>(null);
   const [type, setType] = useState<entityTypes>(entityTypes.Album);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [term, setTerm] = useState<string>('John Lennon');
-  const [searchingFor, setSearchingFor] = useState<string>('Album');
+  const [term, setTerm] = useState<string>("John Lennon");
+  const [searchingFor, setSearchingFor] = useState<string>("Album");
   const [resultCount, setResultCount] = useState<number | null>(null);
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setType(e.target.value as entityTypes);
@@ -34,19 +40,19 @@ function App() {
 
   useEffect(() => {
     switch (type) {
-      case 'musicTrack':
-        setSearchingFor('Track');
+      case "musicTrack":
+        setSearchingFor("Track");
         break;
-      case 'album':
-        setSearchingFor('Album');
+      case "album":
+        setSearchingFor("Album");
         break;
       default:
-        setSearchingFor('Album');
+        setSearchingFor("Album");
     }
   }, [type]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.code === 'Enter') {
+    if (e.code === "Enter") {
       setResults([]);
       getArtwork();
     }
@@ -60,77 +66,74 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         setResultCount(data.resultCount);
-        setHasSearched(true);
-        setResults(data.results);
+        setResults(data.results as IResult[]);
       })
       .finally(() => setIsSearching(false))
-      .catch((error) => {
+      .catch(() => {
         setIsSearching(false);
-        console.log(error);
       });
   };
 
   return (
     <>
-      <Box sx={{ letterSpacing: '-1px' }} bg="gray.800" pb={6} pt={1}>
-        <Container maxW="960px" bg="gray.800" color="white">
+      <Box sx={{ letterSpacing: "-1px" }} bg='gray.800' pb={6} pt={1}>
+        <Container maxW='960px' bg='gray.800' color='white'>
           <Heading
-            sx={{ textTransform: 'lowercase' }}
-            fontWeight="lighter"
-            as="h1"
-            size="lg"
+            sx={{ textTransform: "lowercase" }}
+            fontWeight='lighter'
+            as='h1'
+            size='lg'
             noOfLines={1}
           >
             Apple music
           </Heading>
-          <Heading mt={-2} pl={2} as="h2" size="xl" noOfLines={1}>
+          <Heading mt={-2} pl={2} as='h2' size='xl' noOfLines={1}>
             Artwork Searcher
           </Heading>
         </Container>
       </Box>
-      <Container py={4} maxW="900px">
-        <SimpleGrid columns={2} spacing="40px">
-          <Box py={4} w={'70%'}>
+      <Container py={4} maxW='900px'>
+        <SimpleGrid columns={2} spacing='40px'>
+          <Box py={4} w={"70%"}>
             <Select
               value={type}
-              placeholder="Looking for:"
+              placeholder='Looking for:'
               onChange={() => handleChange}
             >
-              <option value="album">Album</option>
-              <option value="musicTrack">Track</option>
+              <option value='album'>Album</option>
+              <option value='musicTrack'>Track</option>
             </Select>
           </Box>
-          <Box py={4} w={'70%'}>
+          <Box py={4} w={"70%"}>
             <Input
-              variant="outline"
+              variant='outline'
               placeholder={`${searchingFor} name`}
-              onChange={(e) => setTerm(e.target.value.replace(' ', '+'))}
+              onChange={(e) => setTerm(e.target.value.replace(" ", "+"))}
               onKeyDown={(e) => handleKeyDown(e)}
             />
           </Box>
         </SimpleGrid>
-        <Button onClick={getArtwork} colorScheme="blue">
+        <Button onClick={getArtwork} colorScheme='blue'>
           Find artwork
         </Button>
       </Container>
-      <Container maxW="900px" mb={6}>
-        {hasSearched && (
-          <Text py={3} fontSize="lg">
+      <Container maxW='900px' mb={6}>
+        {results && (
+          <Text py={3} fontSize='lg'>
             {results.length > 0
               ? `Displaying ${resultCount} results`
-              : 'No results'}
+              : "No results"}
           </Text>
         )}
 
-        <SimpleGrid columns={[2, null, 3]} spacing="40px">
+        <SimpleGrid columns={[2, null, 3]} spacing='40px'>
           {results &&
             results.map((result) => {
-              const hasImage = result.artworkUrl100;
-              return <Result result={result} />;
+              return <Result {...result} />;
             })}
         </SimpleGrid>
         {isSearching && (
-          <Center className="loading">
+          <Center className='loading'>
             <AiOutlineLoading />
           </Center>
         )}
