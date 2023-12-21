@@ -1,7 +1,6 @@
-import { Box, Image, Link, Text } from "@chakra-ui/react";
+import { Box, Image, Text, Link } from "@chakra-ui/react";
 
 import { IoCloudDownloadOutline } from "react-icons/io5";
-import { IResult } from "../App";
 
 const linkProps = {
   _hover: {
@@ -16,17 +15,33 @@ const linkProps = {
   my: 2,
 };
 
+export type TResult = {
+  artistName: string;
+  collectionName: string;
+  artworkUrl100: string;
+  collectionId: number;
+};
+
+export interface IResultProps {
+  result: TResult;
+}
+
 const getThumb = (url: string, size: string): string => {
   if (!url) return "";
   return url.replace("100x100bb", `${size}x${size}bb`);
 };
 
-const Result = (result: IResult) => {
-  const hasImage = !!result.artworkUrl100;
+const trimDesc = (desc: string, max: number = 100) => {
+  return desc.length > max ? desc.substring(0, max) + "..." : desc;
+};
 
+const Result = ({ result }: IResultProps) => {
+  const hasImage = result.artworkUrl100;
+  console.log(hasImage);
+  console.log(result.collectionName.length);
   return (
     <Box
-      key={result.collectionId}
+      key={result.artworkUrl100}
       maxW='sm'
       borderWidth='1px'
       borderColor={"#e4e4e4"}
@@ -46,7 +61,7 @@ const Result = (result: IResult) => {
             {result.artistName}
           </Text>
           <Text fontSize='sm' fontWeight='normal' letterSpacing='wide'>
-            {result?.collectionName}
+            {trimDesc(result.collectionName)}
           </Text>
         </Box>
         {hasImage ? (

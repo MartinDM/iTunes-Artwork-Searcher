@@ -11,31 +11,20 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
-import Result from "./components/Result";
+import Result, { TResult } from "./components/Result";
 
 enum entityTypes {
   Album = "album",
   Track = "musicTrack",
 }
 
-export interface IResult {
-  artistName: string;
-  collectionName: string;
-  artworkUrl100: string;
-  collectionId: number;
-}
-
 function App() {
-  const [results, setResults] = useState<IResult[] | null>(null);
+  const [results, setResults] = useState<TResult[] | null>(null);
   const [type, setType] = useState<entityTypes>(entityTypes.Album);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [term, setTerm] = useState<string>("John Lennon");
+  const [term, setTerm] = useState<string>();
   const [searchingFor, setSearchingFor] = useState<string>("Album");
   const [resultCount, setResultCount] = useState<number | null>(null);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setType(e.target.value as entityTypes);
-  };
 
   useEffect(() => {
     switch (type) {
@@ -50,7 +39,11 @@ function App() {
     }
   }, [type]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.FormEvent<HTMLSelectElement>) => {
+    setType((e.target as HTMLInputElement).value as entityTypes);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.code === "Enter") {
       setResults([]);
       getArtwork();
@@ -65,7 +58,7 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         setResultCount(data.resultCount);
-        setResults(data.results as IResult[]);
+        setResults(data.results as TResult[]);
       })
       .finally(() => setIsSearching(false))
       .catch(() => {
@@ -96,8 +89,8 @@ function App() {
           <Box py={4} w={"70%"}>
             <Select
               value={type}
+              onChange={(e) => handleChange(e)}
               placeholder='Looking for:'
-              onChange={() => handleChange}
             >
               <option value='album'>Album</option>
               <option value='musicTrack'>Track</option>
@@ -127,8 +120,8 @@ function App() {
 
         <SimpleGrid columns={[2, null, 3]} spacing='40px'>
           {results &&
-            results.map((result) => {
-              return <Result {...result} />;
+            results.map((r: TResult) => {
+              return <Result result={r} />;
             })}
         </SimpleGrid>
         {isSearching && (
