@@ -45,7 +45,6 @@ function App() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.code === "Enter") {
-      setResults([]);
       getArtwork();
     }
   };

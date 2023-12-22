@@ -37,8 +37,6 @@ const trimDesc = (desc: string, max: number = 100) => {
 
 const Result = ({ result }: IResultProps) => {
   const hasImage = result.artworkUrl100;
-  console.log(hasImage);
-  console.log(result.collectionName.length);
   return (
     <Box
       key={result.artworkUrl100}
