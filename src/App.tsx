@@ -12,7 +12,6 @@ import {
 import { useEffect, useState } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
 import Result, { TResult } from "./components/Result";
-import bg from "/bg.jpg";
 
 enum entityTypes {
   Album = "album",
