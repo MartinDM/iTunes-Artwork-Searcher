@@ -45,12 +45,13 @@ function App() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.code === "Enter") {
+    if (e.code === "Enter" && term) {
       getArtwork();
     }
   };
 
   const getArtwork = () => {
+    if (!term) return;
     setIsSearching(true);
     fetch(
       `https://itunes.apple.com/search?term=${term}&country=gb&entity=${type}&limit=20`
@@ -65,8 +66,6 @@ function App() {
         setIsSearching(false);
       });
   };
-
-  console.log(bg);
 
   return (
     <>
@@ -129,7 +128,7 @@ function App() {
         <SimpleGrid columns={[1, 2, 3]} spacing='40px'>
           {results &&
             results.map((r: TResult) => {
-              return <Result result={r} />;
+              return <Result result={r} key={r.collectionId} />;
             })}
         </SimpleGrid>
         {isSearching && (
