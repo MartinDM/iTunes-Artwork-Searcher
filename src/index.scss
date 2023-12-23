@@ -1,6 +1,35 @@
+body,
+html {
+  min-height: 100vh;
+  color: white;
+}
+
+select,
+input {
+  color: white;
+  &::placeholder {
+    color: #aeaeae;
+  }
+}
+
+#root {
+  min-height: 100vh;
+  background-image: url("/bg.jpg");
+  background-size: contain;
+  background-attachment: fixed;
+}
+
+.background {
+  position: absolute;
+  min-height: 100vh;
+  z-index: -1;
+  opacity: 0.6;
+}
+
 .chakra-container {
   max-width: 960px;
 }
+
 .loading svg {
   color: rgb(181 181 181);
   height: 50px;

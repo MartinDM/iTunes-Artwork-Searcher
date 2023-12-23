@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { AiOutlineLoading } from "react-icons/ai";
 import Result, { TResult } from "./components/Result";
+import bg from "/bg.jpg";
 
 enum entityTypes {
   Album = "album",
@@ -65,9 +66,17 @@ function App() {
       });
   };
 
+  console.log(bg);
+
   return (
     <>
-      <Box sx={{ letterSpacing: "-1px" }} bg='gray.800' pb={6} pt={1}>
+      <Box
+        bg='gray.800'
+        className='header'
+        sx={{ letterSpacing: "-1px" }}
+        pb={6}
+        pt={1}
+      >
         <Container maxW='960px' bg='gray.800' color='white'>
           <Heading
             sx={{ textTransform: "lowercase" }}
@@ -84,7 +93,7 @@ function App() {
         </Container>
       </Box>
       <Container py={4} maxW='900px'>
-        <SimpleGrid columns={2} spacing='40px'>
+        <SimpleGrid columns={[1, 2]} spacing='20px'>
           <Box py={4} w={"70%"}>
             <Select
               value={type}
@@ -110,14 +119,14 @@ function App() {
       </Container>
       <Container maxW='900px' mb={6}>
         {results && (
-          <Text py={3} fontSize='lg'>
+          <Text py={3} pb={5} fontSize='lg' color='white'>
             {results.length > 0
               ? `Displaying ${resultCount} results`
               : "No results"}
           </Text>
         )}
 
-        <SimpleGrid columns={[2, null, 3]} spacing='40px'>
+        <SimpleGrid columns={[1, 2, 3]} spacing='40px'>
           {results &&
             results.map((r: TResult) => {
               return <Result result={r} />;
@@ -129,6 +138,20 @@ function App() {
           </Center>
         )}
       </Container>
+      <Text
+        color='white'
+        py={6}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          backgroundColor: "rgba(52,52,52,.4)",
+        }}
+      >
+        A project crafted by Martin ✌️ | &nbsp;
+        <a href='https://github.com/MartinDM/iTunes-Artwork-Searcher'>
+          View on GitHub
+        </a>
+      </Text>
     </>
   );
 }

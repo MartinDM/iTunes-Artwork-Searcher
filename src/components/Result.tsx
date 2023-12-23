@@ -17,7 +17,10 @@ const linkProps = {
 
 export type TResult = {
   artistName: string;
+  collectionType: string;
   collectionName: string;
+  trackName?: string;
+  kind?: string;
   artworkUrl100: string;
   collectionId: number;
 };
@@ -31,20 +34,26 @@ const getThumb = (url: string, size: string): string => {
   return url.replace("100x100bb", `${size}x${size}bb`);
 };
 
-const trimDesc = (desc: string, max: number = 100) => {
+const _trimDesc = (desc: string, max: number = 100) => {
   return desc.length > max ? desc.substring(0, max) + "..." : desc;
+};
+
+const getDesc = (result: TResult) => {
+  const desc =
+    result.kind === "song" ? result.trackName : result.collectionName;
+  if (desc) return _trimDesc(desc);
 };
 
 const Result = ({ result }: IResultProps) => {
   const hasImage = result.artworkUrl100;
   return (
     <Box
+      bg='rgb(9 11 23 / 60%)'
       key={result.artworkUrl100}
       maxW='sm'
       borderWidth='1px'
       borderColor={"#e4e4e4"}
       borderRadius='lg'
-      bg={"gray.800"}
     >
       {hasImage && (
         <Image
@@ -59,8 +68,13 @@ const Result = ({ result }: IResultProps) => {
             {result.artistName}
           </Text>
           <Text fontSize='sm' fontWeight='normal' letterSpacing='wide'>
-            {trimDesc(result.collectionName)}
+            {getDesc(result)}
           </Text>
+          {result.kind === "song" && (
+            <Text as='b' fontSize='sm' fontWeight='normal' letterSpacing='wide'>
+              Album: {result.collectionName}
+            </Text>
+          )}
         </Box>
         {hasImage ? (
           <Box fontWeight='500' alignItems={"center"} gap={2} my={2}>
