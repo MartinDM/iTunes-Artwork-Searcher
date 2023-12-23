@@ -15,7 +15,8 @@ input {
 #root {
   min-height: 100vh;
   background-image: url("/bg.jpg");
-  background-size: contain;
+  background-size: cover;
+  background-repeat: no-repeat;
   background-attachment: fixed;
 }
 
