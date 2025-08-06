@@ -1,7 +1,8 @@
 # iTunes-Artwork-Searcher 🎧
 
 ## Tool for fetching hi-res artwork from the iTunes API
-<a href="mdm-itunes-search.surge.sh">
+
+<a href="http://mdm-itunes-search.surge.sh">
 <img width="475" alt="image" src="https://github.com/MartinDM/React-Firebase-Reactive-ToDo/assets/7467069/cd822310-1514-4157-804f-b2a763f08f63">
 </a>
 
