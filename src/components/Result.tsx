@@ -17,12 +17,16 @@ const linkProps = {
 
 export type TResult = {
   artistName: string;
-  collectionType: string;
-  collectionName: string;
+  artistId?: number;
+  artistLinkUrl?: string;
+  primaryGenreName?: string;
+  collectionType?: string;
+  collectionName?: string;
   trackName?: string;
+  trackId?: number;
   kind?: string;
-  artworkUrl100: string;
-  collectionId: number;
+  artworkUrl100?: string;
+  collectionId?: number;
 };
 
 export interface IResultProps {
@@ -39,13 +43,16 @@ const _trimDesc = (desc: string, max: number = 100) => {
 };
 
 const getDesc = (result: TResult) => {
-  const desc =
-    result.kind === "song" ? result.trackName : result.collectionName;
-  if (desc) return _trimDesc(desc);
+  if (result.kind === "song" && result.trackName)
+    return _trimDesc(result.trackName);
+  if (result.collectionName) return _trimDesc(result.collectionName);
+  if (result.primaryGenreName) return result.primaryGenreName;
+  return undefined;
 };
 
 const Result = ({ result }: IResultProps) => {
-  const hasImage = result.artworkUrl100;
+  const artworkUrl = result.artworkUrl100 ?? "";
+  const hasImage = artworkUrl.length > 0;
   return (
     <Box
       bg='rgb(9 11 23 / 60%)'
@@ -57,8 +64,8 @@ const Result = ({ result }: IResultProps) => {
     >
       {hasImage && (
         <Image
-          src={getThumb(result.artworkUrl100, "270")}
-          alt={result.collectionName}
+          src={getThumb(artworkUrl, "270")}
+          alt={result.collectionName ?? result.artistName}
           width='100%'
         />
       )}
@@ -80,7 +87,7 @@ const Result = ({ result }: IResultProps) => {
           <Box fontWeight='500' alignItems={"center"} gap={2} my={2}>
             <Link
               {...linkProps}
-              href={getThumb(result.artworkUrl100, "600")}
+              href={getThumb(artworkUrl, "600")}
               isExternal
             >
               <IoCloudDownloadOutline />
@@ -88,15 +95,20 @@ const Result = ({ result }: IResultProps) => {
             </Link>
             <Link
               {...linkProps}
-              href={getThumb(result.artworkUrl100, "2000")}
+              href={getThumb(artworkUrl, "2000")}
               isExternal
             >
               <IoCloudDownloadOutline />
               Highest res (2000px)
             </Link>
           </Box>
+        ) : result.artistLinkUrl ? (
+          <Link {...linkProps} href={result.artistLinkUrl} isExternal>
+            <IoCloudDownloadOutline />
+            View artist on Apple Music
+          </Link>
         ) : (
-          `No artwork for ${result.collectionName}`
+          `No artwork for ${result.collectionName ?? result.artistName}`
         )}
       </Box>
     </Box>
